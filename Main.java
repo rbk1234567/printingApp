@@ -15,24 +15,29 @@ public class Main extends JFrame {
     private static JFrame mainWindow = new JFrame("printingApp");
     private static JButton button = new JButton("PRINT");
     private static JTable table;
+    private static Printable printable;
 
     public static void main(String [] args)
     {
-        prepareTableData();
 
+        prepareTableData();
         mainWindow.setSize(300,300);
         mainWindow.setLayout(new FlowLayout());
-        mainWindow.add(button);
-        mainWindow.add(table.getTableHeader());
-        mainWindow.add(table);
 
-
+        printable = table.getPrintable(JTable.PrintMode.FIT_WIDTH,null,null);
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 print();
             }
         });
+
+        mainWindow.add(button);
+
+
+
+
 
         mainWindow.setVisible(true);
         mainWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -47,48 +52,46 @@ public class Main extends JFrame {
                 "Very long Sport",
                 "Very long # of Years",
                 "Very long Vegetarian"};
-        Object[][] data = {
-                {"Kathy", "Smith",
-                        "Snowboarding", new Integer(5), new Boolean(false)},
-                {"John", "Doe",
-                        "Rowing", new Integer(3), new Boolean(true)},
-                {"Sue", "Black",
-                        "Knitting", new Integer(2), new Boolean(false)},
-                {"Jane", "White",
-                        "Speed reading", new Integer(20), new Boolean(true)},
-                {"Joe", "Brown",
-                        "Pool", new Integer(10), new Boolean(false)}
-        };
+        Object[] obj = {"Kathy", "Smith", "Snowboarding", new Integer(5), new Boolean(false)};
+
+        //pagination doesnt work when more than one page must be printed
+        Object[][] data = new Object[240][5];
+        for(int i = 0; i<240 ;i++)
+        {
+            for(int y = 0;y<5;y++) {
+                data[i][y] = obj[y];
+            }
+        }
+
 
         table = new JTable(data,header);
 
-        //scaling print margins work here
+        //scaling print margins work here (changing columns width)
+
         table.getTableHeader().getColumnModel().getColumn(0).setPreferredWidth(450);
         table.getTableHeader().getColumnModel().getColumn(1).setPreferredWidth(450);
         table.getTableHeader().getColumnModel().getColumn(2).setPreferredWidth(450);
         table.getTableHeader().getColumnModel().getColumn(3).setPreferredWidth(450);
         table.getTableHeader().getColumnModel().getColumn(4).setPreferredWidth(450);
+
     }
 
     private static void print() {
 
-        //scaling print margins doesnt work here
-        /*
-        table.getTableHeader().getColumnModel().getColumn(0).setPreferredWidth(450);
-        table.getTableHeader().getColumnModel().getColumn(1).setPreferredWidth(450);
-        table.getTableHeader().getColumnModel().getColumn(2).setPreferredWidth(450);
-        table.getTableHeader().getColumnModel().getColumn(3).setPreferredWidth(450);
-        table.getTableHeader().getColumnModel().getColumn(4).setPreferredWidth(450);
-        */
 
         PrintRequestAttributeSet set = new HashPrintRequestAttributeSet();
-        PrinterJob printerJob = PrinterJob.getPrinterJob();
+
 
 
         set.add(new MediaPrintableArea(0f, 0f, 570, 820, MediaPrintableArea.MM));
         set.add(MediaSizeName.ISO_A4);
 
-        printerJob.setJobName("TABLE");
+        //creates invisible frame to create renderable table view
+        Frame invisibleFrame = new Frame();
+        invisibleFrame.add(table.getTableHeader());
+        invisibleFrame.add(table);
+        invisibleFrame.setVisible(false);
+        invisibleFrame.pack();
 
 
 
